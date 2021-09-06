@@ -11,6 +11,8 @@ using System.Threading;
 using System.Numerics;
 using NAudio.Wave;
 using System.Xml;
+using System.Text;
+using NUnit.Framework;
 
 namespace DigitalMusicAnalysis
 {
@@ -27,6 +29,13 @@ namespace DigitalMusicAnalysis
         private string filename;
         private enum pitchConv { C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B };
         private double bpm = 70;
+
+        const string TIME_FREQ_DATA_FILE =  @"RegressionTestData\TimeFreqData.txt";
+        const string PIXEL_ARRAY_FILE =     @"RegressionTestData\PixelArrayData.txt";
+        const string TWIDDLES_FILE =        @"RegressionTestData\TwiddlesData.txt";
+        const string TWIDDLES2_FILE =       @"RegressionTestData\Twiddles2Data.txt";
+        const string COMP_X_FILE =          @"RegressionTestData\CompXData.txt";
+        const string SHEET_MUSIC_FILE =     @"RegressionTestData\SheetMusicData.txt";
 
         public MainWindow()
         {
@@ -48,6 +57,65 @@ namespace DigitalMusicAnalysis
 
             slider1.ValueChanged += updateHistogram;
             playback.PlaybackStopped += closeMusic;
+
+            WriteOutputToFile();
+            RunRegressionTests();
+        }
+
+        private void RunRegressionTests()
+        {
+            //Verify TimeFreqData
+            Assert.AreEqual(File.ReadAllLines(TIME_FREQ_DATA_FILE), GetTimeFreqDataAsStringArray());
+
+            //Verify Pixel Array Data
+            Assert.AreEqual(File.ReadAllText(PIXEL_ARRAY_FILE), GetPixelArrayAsString());
+
+            //Verify Twiddles
+            Assert.AreEqual(File.ReadAllText(TWIDDLES_FILE), GetTwiddlesAsString());
+
+            //Verify local Twiddles
+            Assert.AreEqual(File.ReadAllText(TWIDDLES2_FILE), GetTwiddles2AsString());
+
+            //Verify Comp X
+            Assert.AreEqual(File.ReadAllText(COMP_X_FILE), GetCompXAsString());
+
+            //Verify Sheet Music
+            Assert.AreEqual(File.ReadAllText(SHEET_MUSIC_FILE), GetSheetMusicObjectsAsString());
+        }
+
+        private string[] GetTimeFreqDataAsStringArray()
+        {
+            string[] data = new string[stftRep.timeFreqData.Length];
+            for (int i = 0; i < stftRep.timeFreqData.Length; i++)
+            {
+                var stftSb = new StringBuilder();
+                for (int k = 0; k < stftRep.timeFreqData[i].Length; k++)
+                    stftSb.Append(stftRep.timeFreqData[i][k]);
+                data[i] = stftSb.ToString();
+                stftSb.Clear();
+            }
+
+            return data;
+        }
+
+        private string GetPixelArrayAsString() { return string.Join(" ", pixelArray); }
+
+        private string GetTwiddlesAsString() { return string.Join(" ", stftRep.twiddles); }
+
+        private string GetTwiddles2AsString() { return string.Join(" ", twiddles); }
+
+        private string GetCompXAsString() { return string.Join(" ", compX); }
+
+        private string GetSheetMusicObjectsAsString() { return string.Join<musicNote>("-", sheetmusic);  }
+
+        private void WriteOutputToFile()
+        {
+            //File.WriteAllLines(TIME_FREQ_DATA_FILE, GetTimeFreqDataAsStringArray());
+            //File.WriteAllText(PIXEL_ARRAY_FILE, GetPixelArrayAsString());
+            //File.WriteAllText(TWIDDLES_FILE, GetTwiddlesAsString());
+            //File.WriteAllText(TWIDDLES2_FILE, GetTwiddles2AsString());
+            //File.WriteAllText(COMP_X_FILE, GetCompXAsString());
+            //File.WriteAllText(SHEET_MUSIC_FILE, GetSheetMusicObjectsAsString());
         }
 
         // Loads time-freq image for tab 1

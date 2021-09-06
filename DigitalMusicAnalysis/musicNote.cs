@@ -14,6 +14,12 @@ namespace DigitalMusicAnalysis
         public int mult;
         public double frequency;
 
+        //For regression testing
+        public override string ToString()
+        {
+            return $"(pitch:{pitch},duration:{duration},flat:{flat},error:{error},staffPos:{staffPos},mult:{mult},frequency:{frequency})";
+        }
+
         public musicNote(double freq, double dur)
         {
             frequency = freq;
