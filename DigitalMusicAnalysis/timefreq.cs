@@ -49,58 +49,43 @@ namespace DigitalMusicAnalysis
             }
 
             timeFreqData = stft(compX, wSamp);
-	
+
         }
 
         float[][] stft(Complex[] x, int wSamp)
         {
-            int ii = 0;
-            int jj = 0;
-            int kk = 0;
-            int ll = 0;
+            int ii, jj, kk, ll;
             int N = x.Length;
-            float fftMax = 0;
-            
+            float fftMax = 0;      
             float[][] Y = new float[wSamp / 2][];
 
             for (ll = 0; ll < wSamp / 2; ll++)
-            {
                 Y[ll] = new float[2 * (int)Math.Floor((double)N / (double)wSamp)];
-            }
             
             Complex[] temp = new Complex[wSamp];
-            Complex[] tempFFT = new Complex[wSamp];
 
-            for (ii = 0; ii < 2 * Math.Floor((double)N / (double)wSamp) - 1; ii++)
+            var fftResults = new Complex[(int)(2 * Math.Floor((double)N / (double)wSamp) - 1)][];
+            System.Threading.Tasks.Parallel.For(0, (int)(2 * Math.Floor((double)N / (double)wSamp) - 1), ii =>
             {
-
+                int jj = 0;
+                int xx = ii;
+                Complex[] temp2 = new Complex[wSamp];
                 for (jj = 0; jj < wSamp; jj++)
-                {
-                    temp[jj] = x[ii * (wSamp / 2) + jj];
-                }
+                    temp2[jj] = x[xx * (wSamp / 2) + jj];
+                fftResults[xx] = fft(temp2);
+            });
 
-                tempFFT = fft(temp);
-
+            for (ii = 0; ii < fftResults.Length; ii++)
                 for (kk = 0; kk < wSamp / 2; kk++)
                 {
-                    Y[kk][ii] = (float)Complex.Abs(tempFFT[kk]);
+                    Y[kk][ii] = (float)Complex.Abs(fftResults[ii][kk]);
 
-                    if (Y[kk][ii] > fftMax)
-                    {
-                        fftMax = Y[kk][ii];
-                    }
+                    if (Y[kk][ii] > fftMax) fftMax = Y[kk][ii];
                 }
-
-
-            }
 
             for (ii = 0; ii < 2 * Math.Floor((double)N / (double)wSamp) - 1; ii++)
-            {
                 for (kk = 0; kk < wSamp / 2; kk++)
-                {
                     Y[kk][ii] /= fftMax;
-                }
-            }
 
             return Y;
         }
@@ -119,12 +104,13 @@ namespace DigitalMusicAnalysis
             {
                 Y[0] = x[0];
             }
-            else{
+            else
+            {
 
-                Complex[] E = new Complex[N/2];
-                Complex[] O = new Complex[N/2];
-                Complex[] even = new Complex[N/2];
-                Complex[] odd = new Complex[N/2];
+                Complex[] E = new Complex[N / 2];
+                Complex[] O = new Complex[N / 2];
+                Complex[] even = new Complex[N / 2];
+                Complex[] odd = new Complex[N / 2];
 
                 for (ii = 0; ii < N; ii++)
                 {
@@ -148,8 +134,8 @@ namespace DigitalMusicAnalysis
                 }
             }
 
-           return Y;
+            return Y;
         }
-        
+
     }
 }
